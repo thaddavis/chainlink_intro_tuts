@@ -15,14 +15,16 @@ import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
  * DO NOT USE THIS CODE IN PRODUCTION.
  */
 
-contract YouTubeAPIConsumer is ChainlinkClient, ConfirmedOwner {
+contract YouTubePerformanceBounty is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
+    // multiple params returned in a single oracle response
     uint256 public views;
+    uint256 public comments;
     bytes32 private jobId;
     uint256 private fee;
 
-    event RequestViews(bytes32 indexed requestId, uint256 views);
+    event  RequestMultipleFulfilled(bytes32 indexed requestId, uint256 views, uint256 comments);
 
     /**
      * @notice Initialize the link token and target oracle
@@ -33,10 +35,14 @@ contract YouTubeAPIConsumer is ChainlinkClient, ConfirmedOwner {
      * jobId: ca98366cc7314957b8c012c72f05aeeb
      *
      */
-    constructor() ConfirmedOwner(msg.sender) {
+    constructor(
+        string memory videoId,
+        uint256 desiredViewsCount,
+        uint256 desiredCommentsCount
+    ) ConfirmedOwner(msg.sender) {
         setChainlinkToken(0x326C977E6efc84E512bB9C30f76E30c160eD06FB); // address of the LINK contract on Goerli
         setChainlinkOracle(0x03cD282a023cB0A7311A5049A68399cfd43bB870);  // address of the Chainlink Oracle/Operator contract on Goerli
-        jobId = "6dd14f57a0bd4a018c43930e08610742";  // External Job ID // when you register the JobID with a Chainlink node you will be given a JobID // remove the hyphens before including
+        jobId = "d7b04fbe0f534f879df5d9c76f069fca";  // External Job ID // when you register the JobID with a Chainlink node you will be given a JobID // remove the hyphens before including
         fee = (1 * LINK_DIVISIBILITY) / 10; // 0,1 * 10**18 (Varies by network and job)
     }
 
@@ -44,7 +50,7 @@ contract YouTubeAPIConsumer is ChainlinkClient, ConfirmedOwner {
      * Create a Chainlink request to retrieve API response, find the target
      * data
      */
-    function requestViews() public returns (bytes32 requestId) {
+    function requestMultipleParameters() public returns (bytes32 requestId) {
         Chainlink.Request memory req = buildChainlinkRequest(
             jobId,
             address(this),
@@ -70,10 +76,12 @@ contract YouTubeAPIConsumer is ChainlinkClient, ConfirmedOwner {
      */
     function fulfill(
         bytes32 _requestId,
-        uint256 _views
+        uint256 _views,
+        uint256 _comments
     ) public recordChainlinkFulfillment(_requestId) {
-        emit RequestViews(_requestId, _views);
+        emit RequestMultipleFulfilled(_requestId, _views, _comments);
         views = _views;
+        comments = _comments;
     }
 
     /**

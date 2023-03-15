@@ -8,7 +8,7 @@ const hre = require('hardhat')
 
 async function main() {
     const BigNumber = hre.ethers.BigNumber
-    const pointOneLink = BigNumber.from("1000000000000000000") // 0.1
+    const pointOneLink = BigNumber.from("100000000000000000") // 0.1
 
     console.log(process.env.GOERLI_RPC_URL)
 
@@ -19,7 +19,7 @@ async function main() {
     // console.log('linkContract', linkContract)
 
     let txnResp = await linkContract.transfer(
-        '0x92D8e5708FE8C9975015047F15314dE61B2dDc2A',
+        '0x574B45Fb1e555c6499ccC0d1AADEc5D059809e95',
         pointOneLink
     )
     console.log(txnResp)

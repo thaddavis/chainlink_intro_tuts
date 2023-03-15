@@ -1,0 +1,29 @@
+type = "directrequest"
+schemaVersion = 1
+name = "YouTube-Data-EA-MWR"
+contractAddress = "0x03cD282a023cB0A7311A5049A68399cfd43bB870"
+maxTaskDuration = "0s"
+observationSource = """
+    decode_log   [type=ethabidecodelog
+                  abi="OracleRequest(bytes32 indexed specId, address requester, bytes32 requestId, uint256 payment, address callbackAddr, bytes4 callbackFunctionId, uint256 cancelExpiration, uint256 dataVersion, bytes data)"
+                  data="$(jobRun.logData)"
+                  topics="$(jobRun.logTopics)"]
+
+    decode_cbor  [type=cborparse data="$(decode_log.data)"]
+    fetch        [type=bridge name="ea-bridge" requestData="{\\"id\\": $(jobSpec.externalJobID), \\"data\\": { \\"id\\": $(decode_cbor.id), \\"part\\": $(decode_cbor.part)}}"]
+    views_parse    [type="jsonparse" path="data,items,0,statistics,viewCount" data="$(fetch)"]
+    comments_parse    [type="jsonparse" path="data,items,0,statistics,commentCount" data="$(fetch)"]
+    views_parse -> encode_mwr
+    comments_parse -> encode_mwr
+    encode_mwr [type="ethabiencode"
+                    abi="(bytes32 requestId, uint256 _views, uint256 _comments)"
+                    data="{\\"requestId\\": $(decode_log.requestId), \\"_views\\": $(views_parse), \\"_comments\\": $(comments_parse)}"
+              ]
+    encode_tx [type=ethabiencode
+                  abi="fulfillOracleRequest2(bytes32 requestId, uint256 payment, address callbackAddress, bytes4 callbackFunctionId, uint256 expiration, bytes calldata data)"
+                  data="{\\"requestId\\": $(decode_log.requestId), \\"payment\\": $(decode_log.payment), \\"callbackAddress\\": $(decode_log.callbackAddr), \\"callbackFunctionId\\": $(decode_log.callbackFunctionId), \\"expiration\\": $(decode_log.cancelExpiration), \\"data\\": $(encode_mwr)}"
+              ]
+    submit_tx    [type=ethtx to="0x03cD282a023cB0A7311A5049A68399cfd43bB870" data="$(encode_tx)"]
+
+    encode_mwr -> encode_tx -> submit_tx
+"""

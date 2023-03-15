@@ -6,11 +6,11 @@ async function main() {
     console.log(process.env.GOERLI_RPC_URL)
 
     await hre.run("compile")
-    const YouTubeAPIConsumer = await hre.ethers.getContractFactory("YouTubeAPIConsumer")
-    const youTubeAPIConsumer = await YouTubeAPIConsumer.deploy()
-    await youTubeAPIConsumer.deployed()
+    // const YouTubeAPIConsumer = await hre.ethers.getContractFactory("YouTubeAPIConsumer")
+    // const youTubeAPIConsumer = await YouTubeAPIConsumer.deploy()
+    // await youTubeAPIConsumer.deployed()
 
-    console.log(youTubeAPIConsumer.address)
+    // console.log(youTubeAPIConsumer.address)
 
     // let txnResponse = await apiConsumer.requestVolumeData()
     // console.log('requestVolumeData()', txnResponse)
