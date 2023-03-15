@@ -2,7 +2,7 @@ require("dotenv").config()
 
 const ABI = require('../abis/LINK.json')
 
-const API_ABI = require('../artifacts/contracts/APIConsumer.sol/APIConsumer.json')
+// const API_ABI = require('../artifacts/contracts/APIConsumer.sol/APIConsumer.json')
 
 const hre = require('hardhat')
 
@@ -12,14 +12,14 @@ async function main() {
 
     console.log(process.env.GOERLI_RPC_URL)
 
-    await hre.run("compile")
+    // await hre.run("compile")
     const [owner] = await hre.ethers.getSigners();
 
     const linkContract = await hre.ethers.getContractAt(ABI, "0x326C977E6efc84E512bB9C30f76E30c160eD06FB", owner)
     // console.log('linkContract', linkContract)
 
     let txnResp = await linkContract.transfer(
-        '0xF2e03403D8Ef643351826bFBaC6eD6ae493E738B',
+        '0x92D8e5708FE8C9975015047F15314dE61B2dDc2A',
         pointOneLink
     )
     console.log(txnResp)

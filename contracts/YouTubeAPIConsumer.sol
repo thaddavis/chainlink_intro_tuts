@@ -15,14 +15,14 @@ import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
  * DO NOT USE THIS CODE IN PRODUCTION.
  */
 
-contract APIConsumer is ChainlinkClient, ConfirmedOwner {
+contract YouTubeAPIConsumer is ChainlinkClient, ConfirmedOwner {
     using Chainlink for Chainlink.Request;
 
-    uint256 public volume;
+    uint256 public views;
     bytes32 private jobId;
     uint256 private fee;
 
-    event RequestVolume(bytes32 indexed requestId, uint256 volume);
+    event RequestViews(bytes32 indexed requestId, uint256 views);
 
     /**
      * @notice Initialize the link token and target oracle
@@ -34,47 +34,32 @@ contract APIConsumer is ChainlinkClient, ConfirmedOwner {
      *
      */
     constructor() ConfirmedOwner(msg.sender) {
-        // setChainlinkToken(0x779877A7B0D9E8603169DdbD7836e478b4624789);
         setChainlinkToken(0x326C977E6efc84E512bB9C30f76E30c160eD06FB); // address of the LINK contract on Goerli
-        // setChainlinkOracle(0x6090149792dAAeE9D1D568c9f9a6F6B46AA29eFD);
-        setChainlinkOracle(0xCC79157eb46F5624204f47AB42b3906cAA40eaB7);  // address of the Chainlink Oracle/Operator contract on Goerli
-        jobId = "ca98366cc7314957b8c012c72f05aeeb"; // External Job ID // when you register the JobID with a Chainlink node you will be given a JobID // remove the hyphens before including
+        setChainlinkOracle(0x03cD282a023cB0A7311A5049A68399cfd43bB870);  // address of the Chainlink Oracle/Operator contract on Goerli
+        jobId = "6dd14f57a0bd4a018c43930e08610742";  // External Job ID // when you register the JobID with a Chainlink node you will be given a JobID // remove the hyphens before including
         fee = (1 * LINK_DIVISIBILITY) / 10; // 0,1 * 10**18 (Varies by network and job)
     }
 
     /**
      * Create a Chainlink request to retrieve API response, find the target
-     * data, then multiply by 1000000000000000000 (to remove decimal places from data).
+     * data
      */
-    function requestVolumeData() public returns (bytes32 requestId) {
+    function requestViews() public returns (bytes32 requestId) {
         Chainlink.Request memory req = buildChainlinkRequest(
             jobId,
             address(this),
             this.fulfill.selector
         );
 
-        // Set the URL to perform the GET request on
         req.add(
-            "get",
-            "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=ETH&tsyms=USD"
+            "id",
+            "ftuu7B0B7EM"
         );
 
-        // Set the path to find the desired data in the API response, where the response format is:
-        // {"RAW":
-        //   {"ETH":
-        //    {"USD":
-        //     {
-        //      "VOLUME24HOUR": xxx.xxx,
-        //     }
-        //    }
-        //   }
-        //  }
-        // request.add("path", "RAW.ETH.USD.VOLUME24HOUR"); // Chainlink nodes prior to 1.0.0 support this format
-        req.add("path", "RAW,ETH,USD,VOLUME24HOUR"); // Chainlink nodes 1.0.0 and later support this format
-
-        // Multiply the result by 1000000000000000000 to remove decimals
-        int256 timesAmount = 10 ** 18;
-        req.addInt("times", timesAmount);
+        req.add(
+            "part",
+            "statistics"
+        );
 
         // Sends the request
         return sendChainlinkRequest(req, fee);
@@ -85,10 +70,10 @@ contract APIConsumer is ChainlinkClient, ConfirmedOwner {
      */
     function fulfill(
         bytes32 _requestId,
-        uint256 _volume
+        uint256 _views
     ) public recordChainlinkFulfillment(_requestId) {
-        emit RequestVolume(_requestId, _volume);
-        volume = _volume;
+        emit RequestViews(_requestId, _views);
+        views = _views;
     }
 
     /**

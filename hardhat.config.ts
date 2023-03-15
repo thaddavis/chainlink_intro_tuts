@@ -9,6 +9,9 @@ const config: HardhatUserConfig = {
       {
         version: "0.8.7",
       },
+      {
+        version: "0.7.6"
+      }
     ],
     overrides: {
       "contracts/HelloWorld.sol": {
@@ -17,6 +20,10 @@ const config: HardhatUserConfig = {
       },
       "contracts/DataFeed.sol": {
         version: "0.8.7",
+        settings: {}
+      },
+      "contracts/Operator.sol": {
+        version: "0.7.6",
         settings: {}
       }
     }
